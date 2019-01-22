@@ -1,6 +1,7 @@
 # APA102 driver for embedded-hal spi traits
 
-Based on the data sheet https://cdn-shop.adafruit.com/datasheets/APA102.pdf, untested
+For usage with the [smart-leds](https://github.com/smart-leds-rs/smart-leds)
+crate, not thoroughly tested (only with the one led on the trinket m0).
 
 ## License
 

@@ -12,6 +12,10 @@ Licensed under either of
 
 at your option.
 
+## Todo
+
+- Implement a `WriteIter` based version
+
 ## Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally submitted

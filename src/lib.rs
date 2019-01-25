@@ -1,17 +1,20 @@
 //! # Use apa102 leds via spi
 //!
+//! - For usage with `smart-leds`
+//! - Implements the `SmartLedsWrite` trait
 //!
+//! Doesn't use the native brightness settings of the apa102 leds, since that
+//! runs at a much lower pwm frequency and thus nerfes the very high color pwm
+//! frequency. (According to Adafruit)
+//!
+//! Needs a type implementing the `blocking::spi::Write` trait.
 
 #![no_std]
 
-extern crate embedded_hal as hal;
-
-use hal::spi::{FullDuplex, Mode, Phase, Polarity};
+use embedded_hal::blocking::spi::Write;
+use embedded_hal::spi::{Mode, Phase, Polarity};
 
 use smart_leds_trait::{Color, SmartLedsWrite};
-
-use nb;
-use nb::block;
 
 /// SPI mode that is needed for this crate
 ///
@@ -27,7 +30,7 @@ pub struct Apa102<SPI> {
 
 impl<SPI, E> Apa102<SPI>
 where
-    SPI: FullDuplex<u8, Error = E>,
+    SPI: Write<u8, Error = E>,
 {
     pub fn new(spi: SPI) -> Apa102<SPI> {
         Self { spi }
@@ -36,7 +39,7 @@ where
 
 impl<SPI, E> SmartLedsWrite for Apa102<SPI>
 where
-    SPI: FullDuplex<u8, Error = E>,
+    SPI: Write<u8, Error = E>,
 {
     type Error = E;
     /// Write all the items of an iterator to a apa102 strip
@@ -44,24 +47,11 @@ where
     where
         T: Iterator<Item = Color>,
     {
-        for _ in 0..4 {
-            block!(self.spi.send(0))?;
-            self.spi.read().ok();
-        }
+        self.spi.write(&[0x00, 0x00, 0x00, 0x00])?;
         for item in iterator {
-            block!(self.spi.send(0xFF))?;
-            self.spi.read().ok();
-            block!(self.spi.send(item.b))?;
-            self.spi.read().ok();
-            block!(self.spi.send(item.g))?;
-            self.spi.read().ok();
-            block!(self.spi.send(item.r))?;
-            self.spi.read().ok();
+            self.spi.write(&[0xFF, item.b, item.g, item.r])?;
         }
-        for _ in 0..4 {
-            block!(self.spi.send(0xFF))?;
-            self.spi.read().ok();
-        }
+        self.spi.write(&[0xFF, 0xFF, 0xFF, 0xFF])?;
         Ok(())
     }
 }

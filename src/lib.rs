@@ -14,7 +14,7 @@
 use embedded_hal::blocking::spi::Write;
 use embedded_hal::spi::{Mode, Phase, Polarity};
 
-use smart_leds_trait::{Color, SmartLedsWrite};
+use smart_leds_trait::{SmartLedsWrite, RGB8};
 
 /// SPI mode that is needed for this crate
 ///
@@ -42,13 +42,16 @@ where
     SPI: Write<u8, Error = E>,
 {
     type Error = E;
+    type Color = RGB8;
     /// Write all the items of an iterator to a apa102 strip
-    fn write<T>(&mut self, iterator: T) -> Result<(), E>
+    fn write<T, I>(&mut self, iterator: T) -> Result<(), Self::Error>
     where
-        T: Iterator<Item = Color>,
+        T: Iterator<Item = I>,
+        I: Into<Self::Color>,
     {
         self.spi.write(&[0x00, 0x00, 0x00, 0x00])?;
         for item in iterator {
+            let item = item.into();
             self.spi.write(&[0xFF, item.b, item.g, item.r])?;
         }
         self.spi.write(&[0xFF, 0xFF, 0xFF, 0xFF])?;

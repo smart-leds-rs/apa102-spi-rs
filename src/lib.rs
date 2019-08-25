@@ -54,7 +54,6 @@ where
             let item = item.into();
             self.spi.write(&[0xFF, item.b, item.g, item.r])?;
         }
-        self.spi.write(&[0xFF, 0xFF, 0xFF, 0xFF])?;
         Ok(())
     }
 }

@@ -26,6 +26,8 @@ pub const MODE: Mode = Mode {
 
 pub struct Apa102<SPI> {
     spi: SPI,
+    postamble_length: u8,
+    invert_postamble: bool,
 }
 
 impl<SPI, E> Apa102<SPI>
@@ -33,7 +35,23 @@ where
     SPI: Write<u8, Error = E>,
 {
     pub fn new(spi: SPI) -> Apa102<SPI> {
-        Self { spi }
+        Self {
+            spi,
+            postamble_length: 4,
+            invert_postamble: false,
+        }
+    }
+
+    pub fn new_with_custom_postamble(
+        spi: SPI,
+        postamble_length: u8,
+        invert_postamble: bool,
+    ) -> Apa102<SPI> {
+        Self {
+            spi,
+            postamble_length,
+            invert_postamble,
+        }
     }
 }
 
@@ -53,6 +71,12 @@ where
         for item in iterator {
             let item = item.into();
             self.spi.write(&[0xFF, item.b, item.g, item.r])?;
+        }
+        for _ in 0..self.postamble_length {
+            match self.invert_postamble {
+                false => self.spi.write(&[0xFF])?,
+                true => self.spi.write(&[0x00])?,
+            };
         }
         Ok(())
     }

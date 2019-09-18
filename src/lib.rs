@@ -26,31 +26,35 @@ pub const MODE: Mode = Mode {
 
 pub struct Apa102<SPI> {
     spi: SPI,
-    postamble_length: u8,
-    invert_postamble: bool,
+    end_frame_length: u8,
+    invert_end_frame: bool,
 }
 
 impl<SPI, E> Apa102<SPI>
 where
     SPI: Write<u8, Error = E>,
 {
+    /// new constructs a controller for a series of APA102 LEDs.
+    /// By default, an End Frame consisting of 32 bits of zeroes is emitted
+    /// following the LED data. Control over the size and polarity
+    /// of the End Frame is possible using new_with_custom_postamble().
     pub fn new(spi: SPI) -> Apa102<SPI> {
         Self {
             spi,
-            postamble_length: 4,
-            invert_postamble: false,
+            end_frame_length: 4,
+            invert_end_frame: true,
         }
     }
 
     pub fn new_with_custom_postamble(
         spi: SPI,
-        postamble_length: u8,
-        invert_postamble: bool,
+        end_frame_length: u8,
+        invert_end_frame: bool,
     ) -> Apa102<SPI> {
         Self {
             spi,
-            postamble_length,
-            invert_postamble,
+            end_frame_length,
+            invert_end_frame,
         }
     }
 }
@@ -61,7 +65,7 @@ where
 {
     type Error = E;
     type Color = RGB8;
-    /// Write all the items of an iterator to a apa102 strip
+    /// Write all the items of an iterator to an apa102 strip
     fn write<T, I>(&mut self, iterator: T) -> Result<(), Self::Error>
     where
         T: Iterator<Item = I>,
@@ -72,8 +76,8 @@ where
             let item = item.into();
             self.spi.write(&[0xFF, item.b, item.g, item.r])?;
         }
-        for _ in 0..self.postamble_length {
-            match self.invert_postamble {
+        for _ in 0..self.end_frame_length {
+            match self.invert_end_frame {
                 false => self.spi.write(&[0xFF])?,
                 true => self.spi.write(&[0x00])?,
             };

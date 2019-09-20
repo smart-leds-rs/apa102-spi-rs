@@ -20,8 +20,8 @@ use smart_leds_trait::{SmartLedsWrite, RGB8};
 ///
 /// Provided for convenience
 pub const MODE: Mode = Mode {
-    polarity: Polarity::IdleHigh,
-    phase: Phase::CaptureOnSecondTransition,
+    polarity: Polarity::IdleLow,
+    phase: Phase::CaptureOnFirstTransition,
 };
 
 pub struct Apa102<SPI> {

@@ -1,6 +1,6 @@
 [package]
 name = "apa102-spi"
-version = "0.3.1"
+version = "0.3.2"
 authors = ["David Sawatzke <david-sawatzke@users.noreply.github.com>"]
 edition = "2018"
 categories = [
@@ -12,7 +12,7 @@ description = "SPI-based Driver for apa102 leds"
 documentation = "https://docs.rs/crate/apa102-spi"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
-repository = "https://github.com/smart-leds-rs/apa102-rs"
+repository = "https://github.com/smart-leds-rs/apa102-spi-rs"
 
 [dependencies]
 smart-leds-trait = "0.2"

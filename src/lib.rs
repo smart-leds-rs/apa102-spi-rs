@@ -49,9 +49,9 @@ where
     /// new constructs a controller for a series of APA102 LEDs.
     /// By default, an End Frame consisting of 32 bits of zeroes is emitted
     /// following the LED data. Control over the size and polarity
-    /// of the End Frame is possible using new_with_custom_postamble().
+    /// of the End Frame is possible using new_with_options().
     /// PixelOrder defaults to BGR ordering, and can also be customized
-    /// using new_with_custom_postamble
+    /// using new_with_options()
     pub fn new(spi: SPI) -> Apa102<SPI> {
         Self {
             spi,
@@ -61,7 +61,7 @@ where
         }
     }
 
-    pub fn new_with_custom_postamble(
+    pub fn new_with_options(
         spi: SPI,
         end_frame_length: u8,
         invert_end_frame: bool,

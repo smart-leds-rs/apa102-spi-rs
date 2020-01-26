@@ -28,6 +28,18 @@ pub struct Apa102<SPI> {
     spi: SPI,
     end_frame_length: u8,
     invert_end_frame: bool,
+    pixel_type: PixelType,
+}
+
+/// What order to transmit pixel colors. Different Dotstars
+/// need their pixel color data sent in different orders.
+pub enum PixelType {
+    RGB,
+    RBG,
+    GRB,
+    GBR,
+    BRG,
+    BGR, // Default
 }
 
 impl<SPI, E> Apa102<SPI>
@@ -43,6 +55,7 @@ where
             spi,
             end_frame_length: 4,
             invert_end_frame: true,
+            pixel_type: PixelType::BGR,
         }
     }
 
@@ -50,11 +63,13 @@ where
         spi: SPI,
         end_frame_length: u8,
         invert_end_frame: bool,
+        pixel_type: PixelType,
     ) -> Apa102<SPI> {
         Self {
             spi,
             end_frame_length,
             invert_end_frame,
+            pixel_type,
         }
     }
 }
@@ -74,7 +89,14 @@ where
         self.spi.write(&[0x00, 0x00, 0x00, 0x00])?;
         for item in iterator {
             let item = item.into();
-            self.spi.write(&[0xFF, item.b, item.g, item.r])?;
+            match self.pixel_type {
+                PixelType::RGB => self.spi.write(&[0xFF, item.r, item.g, item.b])?,
+                PixelType::RBG => self.spi.write(&[0xFF, item.r, item.b, item.g])?,
+                PixelType::GRB => self.spi.write(&[0xFF, item.g, item.r, item.b])?,
+                PixelType::GBR => self.spi.write(&[0xFF, item.g, item.b, item.r])?,
+                PixelType::BRG => self.spi.write(&[0xFF, item.b, item.r, item.g])?,
+                PixelType::BGR => self.spi.write(&[0xFF, item.b, item.g, item.r])?,
+            }
         }
         for _ in 0..self.end_frame_length {
             match self.invert_end_frame {

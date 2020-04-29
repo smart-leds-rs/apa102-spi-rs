@@ -88,22 +88,22 @@ where
         T: Iterator<Item = I>,
         I: Into<Self::Color>,
     {
-        self.spi.write(&[0x00, 0x00, 0x00, 0x00])?;
+        self.spi.try_write(&[0x00, 0x00, 0x00, 0x00])?;
         for item in iterator {
             let item = item.into();
             match self.pixel_order {
-                PixelOrder::RGB => self.spi.write(&[0xFF, item.r, item.g, item.b])?,
-                PixelOrder::RBG => self.spi.write(&[0xFF, item.r, item.b, item.g])?,
-                PixelOrder::GRB => self.spi.write(&[0xFF, item.g, item.r, item.b])?,
-                PixelOrder::GBR => self.spi.write(&[0xFF, item.g, item.b, item.r])?,
-                PixelOrder::BRG => self.spi.write(&[0xFF, item.b, item.r, item.g])?,
-                PixelOrder::BGR => self.spi.write(&[0xFF, item.b, item.g, item.r])?,
+                PixelOrder::RGB => self.spi.try_write(&[0xFF, item.r, item.g, item.b])?,
+                PixelOrder::RBG => self.spi.try_write(&[0xFF, item.r, item.b, item.g])?,
+                PixelOrder::GRB => self.spi.try_write(&[0xFF, item.g, item.r, item.b])?,
+                PixelOrder::GBR => self.spi.try_write(&[0xFF, item.g, item.b, item.r])?,
+                PixelOrder::BRG => self.spi.try_write(&[0xFF, item.b, item.r, item.g])?,
+                PixelOrder::BGR => self.spi.try_write(&[0xFF, item.b, item.g, item.r])?,
             }
         }
         for _ in 0..self.end_frame_length {
             match self.invert_end_frame {
-                false => self.spi.write(&[0xFF])?,
-                true => self.spi.write(&[0x00])?,
+                false => self.spi.try_write(&[0xFF])?,
+                true => self.spi.try_write(&[0x00])?,
             };
         }
         Ok(())

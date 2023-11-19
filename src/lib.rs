@@ -74,6 +74,11 @@ where
             pixel_order,
         }
     }
+
+    /// Free the owned resources consuming self
+    pub fn free(self) -> SPI {
+        self.spi
+    }
 }
 
 impl<SPI, E> SmartLedsWrite for Apa102<SPI>

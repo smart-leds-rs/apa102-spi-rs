@@ -11,7 +11,7 @@
 
 #![no_std]
 
-use embedded_hal::blocking::spi::Write;
+use embedded_hal::spi::SpiBus;
 use embedded_hal::spi::{Mode, Phase, Polarity};
 
 use smart_leds_trait::{SmartLedsWrite, RGB8};
@@ -42,9 +42,9 @@ pub enum PixelOrder {
     BGR, // Default
 }
 
-impl<SPI, E> Apa102<SPI>
+impl<SPI> Apa102<SPI>
 where
-    SPI: Write<u8, Error = E>,
+    SPI: SpiBus,
 {
     /// new constructs a controller for a series of APA102 LEDs.
     /// By default, an End Frame consisting of 32 bits of zeroes is emitted
@@ -76,16 +76,16 @@ where
     }
 }
 
-impl<SPI, E> SmartLedsWrite for Apa102<SPI>
+impl<SPI> SmartLedsWrite for Apa102<SPI>
 where
-    SPI: Write<u8, Error = E>,
+    SPI: SpiBus,
 {
-    type Error = E;
     type Color = RGB8;
+    type Error = SPI::Error;
     /// Write all the items of an iterator to an apa102 strip
-    fn write<T, I>(&mut self, iterator: T) -> Result<(), Self::Error>
+    fn write<T, I>(&mut self, iterator: T) -> Result<(), SPI::Error>
     where
-        T: Iterator<Item = I>,
+        T: IntoIterator<Item = I>,
         I: Into<Self::Color>,
     {
         self.spi.write(&[0x00, 0x00, 0x00, 0x00])?;

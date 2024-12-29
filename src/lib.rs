@@ -3,10 +3,6 @@
 //! - For usage with `smart-leds`
 //! - Implements the `SmartLedsWrite` trait
 //!
-//! Doesn't use the native brightness settings of the apa102 leds, since that
-//! runs at a much lower pwm frequency and thus nerfes the very high color pwm
-//! frequency. (According to Adafruit)
-//!
 //! Needs a type implementing the `blocking::spi::Write` trait.
 
 #![no_std]
@@ -14,10 +10,13 @@
 mod asynch;
 pub use asynch::Apa102Async;
 
+mod pixel;
+pub use pixel::Apa102Pixel;
+
 use embedded_hal::spi::SpiBus;
 use embedded_hal::spi::{Mode, Phase, Polarity};
 
-use smart_leds_trait::{SmartLedsWrite, RGB8};
+use smart_leds_trait::SmartLedsWrite;
 
 /// SPI mode that is needed for this crate
 ///
@@ -88,7 +87,7 @@ impl<SPI> SmartLedsWrite for Apa102<SPI>
 where
     SPI: SpiBus,
 {
-    type Color = RGB8;
+    type Color = Apa102Pixel;
     type Error = SPI::Error;
     /// Write all the items of an iterator to an apa102 strip
     fn write<T, I>(&mut self, iterator: T) -> Result<(), SPI::Error>
@@ -100,12 +99,42 @@ where
         for item in iterator {
             let item = item.into();
             match self.pixel_order {
-                PixelOrder::RGB => self.spi.write(&[0xFF, item.r, item.g, item.b])?,
-                PixelOrder::RBG => self.spi.write(&[0xFF, item.r, item.b, item.g])?,
-                PixelOrder::GRB => self.spi.write(&[0xFF, item.g, item.r, item.b])?,
-                PixelOrder::GBR => self.spi.write(&[0xFF, item.g, item.b, item.r])?,
-                PixelOrder::BRG => self.spi.write(&[0xFF, item.b, item.r, item.g])?,
-                PixelOrder::BGR => self.spi.write(&[0xFF, item.b, item.g, item.r])?,
+                PixelOrder::RGB => self.spi.write(&[
+                    0b11100000 | item.brightness,
+                    item.red,
+                    item.green,
+                    item.blue,
+                ])?,
+                PixelOrder::RBG => self.spi.write(&[
+                    0b11100000 | item.brightness,
+                    item.red,
+                    item.blue,
+                    item.green,
+                ])?,
+                PixelOrder::GRB => self.spi.write(&[
+                    0b11100000 | item.brightness,
+                    item.green,
+                    item.red,
+                    item.blue,
+                ])?,
+                PixelOrder::GBR => self.spi.write(&[
+                    0b11100000 | item.brightness,
+                    item.green,
+                    item.blue,
+                    item.red,
+                ])?,
+                PixelOrder::BRG => self.spi.write(&[
+                    0b11100000 | item.brightness,
+                    item.blue,
+                    item.red,
+                    item.green,
+                ])?,
+                PixelOrder::BGR => self.spi.write(&[
+                    0b11100000 | item.brightness,
+                    item.blue,
+                    item.green,
+                    item.red,
+                ])?,
             }
         }
         for _ in 0..self.end_frame_length {

@@ -13,6 +13,10 @@ pub use asynch::Apa102Async;
 mod pixel;
 pub use pixel::Apa102Pixel;
 
+mod bitshift;
+mod math;
+mod pseudo13;
+
 use embedded_hal::spi::SpiBus;
 use embedded_hal::spi::{Mode, Phase, Polarity};
 

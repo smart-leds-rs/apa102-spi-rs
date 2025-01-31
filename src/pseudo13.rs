@@ -4,6 +4,7 @@
 use crate::{bitshift::*, math::*, Apa102Pixel};
 use core::cmp::max;
 use smart_leds_trait::{RGB16, RGB8};
+use ux::u5;
 
 pub(crate) fn five_bit_bitshift(mut in_color: RGB16, mut brightness: u8) -> Apa102Pixel {
     if brightness == 0 {
@@ -11,7 +12,7 @@ pub(crate) fn five_bit_bitshift(mut in_color: RGB16, mut brightness: u8) -> Apa1
             red: 0,
             green: 0,
             blue: 0,
-            brightness: 0,
+            brightness: u5::new(0),
         };
     }
 
@@ -20,11 +21,8 @@ pub(crate) fn five_bit_bitshift(mut in_color: RGB16, mut brightness: u8) -> Apa1
             red: 0,
             green: 0,
             blue: 0,
-            brightness: if brightness <= 0b00011111 {
-                brightness
-            } else {
-                0b00011111
-            },
+            // using u5::new unconditionally would panic for brightness > u5::MAX
+            brightness: u5::new(brightness.max(u5::MAX.into())),
         };
     }
 
@@ -68,7 +66,7 @@ pub(crate) fn five_bit_bitshift(mut in_color: RGB16, mut brightness: u8) -> Apa1
         red: map16_to_8(in_color.r),
         green: map16_to_8(in_color.g),
         blue: map16_to_8(in_color.b),
-        brightness: v5,
+        brightness: u5::new(v5),
     }
 }
 
@@ -110,7 +108,7 @@ pub(crate) fn five_bit_hd_gamma_bitshift(
             red: 0,
             blue: 0,
             green: 0,
-            brightness: 0,
+            brightness: u5::new(0),
         };
     }
 
@@ -143,34 +141,34 @@ mod test {
     fn test_five_bit_bitshift() {
         #[rustfmt::skip]
         let test_data = [
-            (RGB16 {      r:   0, g:     0, b:    0},            0,   // input
-            Apa102Pixel { red: 0, green: 0, blue: 0, brightness: 0}), // output
+            (RGB16 {      r:   0, g:     0, b:    0},                    0,   // input
+            Apa102Pixel { red: 0, green: 0, blue: 0, brightness: u5::new(0)}), // output
 
             // 0 brightness brings all colors down to 0
-            (RGB16 {      r:   0xffff, g:     0xffff, b:    0xffff},            0,
-            Apa102Pixel { red: 0,      green: 0,      blue: 0,      brightness: 0}),
+            (RGB16 {      r:   0xffff, g:     0xffff, b:    0xffff},                    0,
+            Apa102Pixel { red: 0,      green: 0,      blue: 0,      brightness: u5::new(0)}),
 
             // color values below 8 become 0 at max brightness
-            (RGB16 {      r:   8, g:     7, b:    0},            255,
-            Apa102Pixel { red: 1, green: 0, blue: 0, brightness: 1}),
+            (RGB16 {      r:   8, g:     7, b:    0},                    255,
+            Apa102Pixel { red: 1, green: 0, blue: 0, brightness: u5::new(1)}),
 
-            (RGB16 {      r:   0xffff, g:     0x00f0, b:    0x000f},            0x01,
-            Apa102Pixel { red: 0x11,   green: 0x00,   blue: 0x00,   brightness: 0x01}),
+            (RGB16 {      r:   0xffff, g:     0x00f0, b:    0x000f},                    0x01,
+            Apa102Pixel { red: 0x11,   green: 0x00,   blue: 0x00,   brightness: u5::new(0x01)}),
 
-            (RGB16 {      r:   0x0100, g:     0x00f0, b:    0x000f},            0xff,
-            Apa102Pixel { red: 0x08,   green: 0x08,   blue: 0x00,   brightness: 0x03}),
+            (RGB16 {      r:   0x0100, g:     0x00f0, b:    0x000f},                    0xff,
+            Apa102Pixel { red: 0x08,   green: 0x08,   blue: 0x00,   brightness: u5::new(0x03)}),
 
-            (RGB16 {      r:   0x2000, g:     0x1000, b:    0x0f00},            0x20,
-            Apa102Pixel { red: 0x20,   green: 0x10,   blue: 0x0f,   brightness: 0x03}),
+            (RGB16 {      r:   0x2000, g:     0x1000, b:    0x0f00},                    0x20,
+            Apa102Pixel { red: 0x20,   green: 0x10,   blue: 0x0f,   brightness: u5::new(0x03)}),
 
-            (RGB16 {      r:   0xffff, g:     0x8000, b:    0x4000},            0x40,
-            Apa102Pixel { red: 0x81,   green: 0x41,   blue: 0x20,   brightness: 0x0f}),
+            (RGB16 {      r:   0xffff, g:     0x8000, b:    0x4000},                    0x40,
+            Apa102Pixel { red: 0x81,   green: 0x41,   blue: 0x20,   brightness: u5::new(0x0f)}),
 
-            (RGB16 {      r:   0xffff, g:     0x8000, b:    0x4000},            0x80,
-            Apa102Pixel { red: 0x81,   green: 0x41,   blue: 0x20,   brightness: 0x1f}),
+            (RGB16 {      r:   0xffff, g:     0x8000, b:    0x4000},                    0x80,
+            Apa102Pixel { red: 0x81,   green: 0x41,   blue: 0x20,   brightness: u5::new(0x1f)}),
 
-            (RGB16 {      r:   0xffff, g:     0xffff, b:    0xffff},            0xff,
-            Apa102Pixel { red: 0xff,   green: 0xff,   blue: 0xff,   brightness: 0x1f}),
+            (RGB16 {      r:   0xffff, g:     0xffff, b:    0xffff},                    0xff,
+            Apa102Pixel { red: 0xff,   green: 0xff,   blue: 0xff,   brightness: u5::new(0x1f)}),
         ];
 
         for data in test_data {
@@ -184,29 +182,29 @@ mod test {
     fn test_five_bit_hd_gamma_bitshift() {
         #[rustfmt::skip]
         let test_data = [
-            (RGB8 {       r:   0, g:     0, b:    0},            0,   // input
-            Apa102Pixel { red: 0, green: 0, blue: 0, brightness: 0}), // output
+            (RGB8 {       r:   0, g:     0, b:    0},                    0,   // input
+            Apa102Pixel { red: 0, green: 0, blue: 0, brightness: u5::new(0)}), // output
             // 0 brightness brings all colors down to 0
-            (RGB8 {       r:   255, g:     255, b:    255},          0,
-            Apa102Pixel { red: 0,   green: 0,   blue: 0, brightness: 0}),
+            (RGB8 {       r:   255, g:     255, b:    255},                  0,
+            Apa102Pixel { red: 0,   green: 0,   blue: 0, brightness: u5::new(0)}),
 
-            (RGB8 {       r:   16, g:     16, b:    16},           16,
-            Apa102Pixel { red: 0,  green: 0,  blue: 0, brightness: 1}),
+            (RGB8 {       r:   16, g:     16, b:    16},                   16,
+            Apa102Pixel { red: 0,  green: 0,  blue: 0, brightness: u5::new(1)}),
 
-            (RGB8 {       r:   64, g:     64, b:    64},           8,
-            Apa102Pixel { red: 4,  green: 4,  blue: 4, brightness: 1}),
+            (RGB8 {       r:   64, g:     64, b:    64},                   8,
+            Apa102Pixel { red: 4,  green: 4,  blue: 4, brightness: u5::new(1)}),
 
-            (RGB8 {       r:   255, g:     127, b:    43},           1,
-            Apa102Pixel { red: 17,  green: 3,   blue: 0, brightness: 1}),
+            (RGB8 {       r:   255, g:     127, b:    43},                   1,
+            Apa102Pixel { red: 17,  green: 3,   blue: 0, brightness: u5::new(1)}),
 
-            (RGB8 {       r:   255, g:     127, b:    43},           64,
-            Apa102Pixel { red: 129, green: 21,  blue: 1, brightness: 15}),
+            (RGB8 {       r:   255, g:     127, b:    43},                   64,
+            Apa102Pixel { red: 129, green: 21,  blue: 1, brightness: u5::new(15)}),
 
-            (RGB8 {       r:   255, g:     127, b:    43},           255,
-            Apa102Pixel { red: 255, green: 42,  blue: 3, brightness: 31}),
+            (RGB8 {       r:   255, g:     127, b:    43},                   255,
+            Apa102Pixel { red: 255, green: 42,  blue: 3, brightness: u5::new(31)}),
 
-            (RGB8 {       r:   255, g:     255, b:    255},            255,
-            Apa102Pixel { red: 255, green: 255, blue: 255, brightness: 31}),
+            (RGB8 {       r:   255, g:     255, b:    255},                    255,
+            Apa102Pixel { red: 255, green: 255, blue: 255, brightness: u5::new(31)}),
         ];
 
         for data in test_data {

@@ -74,7 +74,7 @@ where
                 PixelOrder::RGB => {
                     self.spi
                         .write(&[
-                            0b11100000 | item.brightness,
+                            0b11100000 | u8::from(item.brightness),
                             item.red,
                             item.green,
                             item.blue,
@@ -84,7 +84,7 @@ where
                 PixelOrder::RBG => {
                     self.spi
                         .write(&[
-                            0b11100000 | item.brightness,
+                            0b11100000 | u8::from(item.brightness),
                             item.red,
                             item.blue,
                             item.green,
@@ -94,7 +94,7 @@ where
                 PixelOrder::GRB => {
                     self.spi
                         .write(&[
-                            0b11100000 | item.brightness,
+                            0b11100000 | u8::from(item.brightness),
                             item.green,
                             item.red,
                             item.blue,
@@ -104,7 +104,7 @@ where
                 PixelOrder::GBR => {
                     self.spi
                         .write(&[
-                            0b11100000 | item.brightness,
+                            0b11100000 | u8::from(item.brightness),
                             item.green,
                             item.blue,
                             item.red,
@@ -114,7 +114,7 @@ where
                 PixelOrder::BRG => {
                     self.spi
                         .write(&[
-                            0b11100000 | item.brightness,
+                            0b11100000 | u8::from(item.brightness),
                             item.blue,
                             item.red,
                             item.green,
@@ -124,7 +124,7 @@ where
                 PixelOrder::BGR => {
                     self.spi
                         .write(&[
-                            0b11100000 | item.brightness,
+                            0b11100000 | u8::from(item.brightness),
                             item.blue,
                             item.green,
                             item.red,

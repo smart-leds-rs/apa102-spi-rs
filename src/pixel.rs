@@ -1,16 +1,27 @@
 use smart_leds_trait::{RGB16, RGB8};
+use ux::u5;
 
-/// This struct represents a single APA102 pixel, which uses 8 bits each for red, green, and blue, plus 5 bits for brightness.
-/// Brightness is represented by a `u8` without any checks for valid values to make this struct a
-/// zero-cost abstraction. Any `u8` values above the maximum for 5 bits (0b00011111 in binary or 31 in decimal)
-/// will be truncated to the maximum when writing data to the APA102 LEDs.
+/// A single APA102 pixel: 8 bits each for red, green, and blue, plus 5 bits for brightness
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord)]
-#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct Apa102Pixel {
     pub red: u8,
     pub green: u8,
     pub blue: u8,
-    pub brightness: u8,
+    pub brightness: u5,
+}
+
+#[cfg(feature = "defmt")]
+impl defmt::Format for Apa102Pixel {
+    fn format(&self, fmt: defmt::Formatter) {
+        defmt::write!(
+            fmt,
+            "Apa102Pixel {{ red: {=u8:?}, green: {=u8:?}, blue: {=u8:?}, brightness: {=u8:?} }}",
+            self.red,
+            self.green,
+            self.blue,
+            u8::from(self.brightness)
+        );
+    }
 }
 
 impl From<RGB8> for Apa102Pixel {
@@ -20,7 +31,7 @@ impl From<RGB8> for Apa102Pixel {
             red: old.r,
             green: old.g,
             blue: old.b,
-            brightness: 0b00011111,
+            brightness: u5::MAX,
         }
     }
 }

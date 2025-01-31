@@ -12,6 +12,7 @@ pub use asynch::Apa102Async;
 
 mod pixel;
 pub use pixel::Apa102Pixel;
+pub use ux::u5;
 
 mod bitshift;
 mod math;
@@ -104,37 +105,37 @@ where
             let item = item.into();
             match self.pixel_order {
                 PixelOrder::RGB => self.spi.write(&[
-                    0b11100000 | item.brightness,
+                    0b11100000 | u8::from(item.brightness),
                     item.red,
                     item.green,
                     item.blue,
                 ])?,
                 PixelOrder::RBG => self.spi.write(&[
-                    0b11100000 | item.brightness,
+                    0b11100000 | u8::from(item.brightness),
                     item.red,
                     item.blue,
                     item.green,
                 ])?,
                 PixelOrder::GRB => self.spi.write(&[
-                    0b11100000 | item.brightness,
+                    0b11100000 | u8::from(item.brightness),
                     item.green,
                     item.red,
                     item.blue,
                 ])?,
                 PixelOrder::GBR => self.spi.write(&[
-                    0b11100000 | item.brightness,
+                    0b11100000 | u8::from(item.brightness),
                     item.green,
                     item.blue,
                     item.red,
                 ])?,
                 PixelOrder::BRG => self.spi.write(&[
-                    0b11100000 | item.brightness,
+                    0b11100000 | u8::from(item.brightness),
                     item.blue,
                     item.red,
                     item.green,
                 ])?,
                 PixelOrder::BGR => self.spi.write(&[
-                    0b11100000 | item.brightness,
+                    0b11100000 | u8::from(item.brightness),
                     item.blue,
                     item.green,
                     item.red,

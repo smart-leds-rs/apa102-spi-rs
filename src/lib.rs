@@ -2,8 +2,8 @@
 //!
 //! There are several ways to send pixel data:
 //!   * Handle all details of the protocol yourself with the [Apa102Pixel] struct, 8 bit RGB + 5 bits brightness
-//!   * Simply provide [smart_leds_trait::RGB8] values, hardcoding maximum brightness. This may be uncomfortably bright.
-//!   * Use [FastLED's pseudo-13-bit gamma correction algorithm](https://github.com/FastLED/FastLED/blob/master/APA102.md) to convert [smart_leds_trait::RGB8] + 8 bit brightness to 8 bit RGB + 5 bit brightness.
+//!   * Simply provide [RGB8] values, hardcoding maximum brightness. This may be uncomfortably bright.
+//!   * Use [FastLED's pseudo-13-bit gamma correction algorithm](https://github.com/FastLED/FastLED/blob/master/APA102.md) to convert [RGB8] + 8 bit brightness to 8 bit RGB + 5 bit brightness.
 //!
 //! ```
 //! # use embedded_hal::spi::{SpiBus, ErrorType, ErrorKind};
@@ -34,8 +34,7 @@
 //! #   }
 //! # }
 //! # let get_spi_peripheral_from_your_hal = DummySpi {};
-//! use smart_leds_trait::{SmartLedsWrite, RGB8};
-//! use apa102_spi::{Apa102, Apa102Pixel, u5};
+//! use apa102_spi::{Apa102, Apa102Pixel, u5, SmartLedsWrite, RGB8};
 //!
 //! // You only need to specify MOSI and clock pins for your SPI peripheral.
 //! // APA102 LEDs do not send data over MISO and do not have a CS pin.
@@ -61,6 +60,8 @@
 //!   * `defmt`: impl [defmt::Format] for [Apa102Pixel] (off by default)
 
 #![no_std]
+
+pub use smart_leds_trait::{SmartLedsWrite, SmartLedsWriteAsync, RGB, RGB16, RGB8};
 
 mod pixel;
 pub use pixel::Apa102Pixel;

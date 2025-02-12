@@ -56,6 +56,9 @@
 //! led_strip.write(led_buffer_rgb.map(
 //!   |p| Apa102Pixel::from_rgb8_with_brightness(p, 255, None)));
 //! ```
+//!
+//! ## Cargo features
+//!   * `defmt`: impl [defmt::Format] for [Apa102Pixel] (off by default)
 
 #![no_std]
 

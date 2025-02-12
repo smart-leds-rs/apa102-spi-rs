@@ -1,17 +1,18 @@
 use crate::{Apa102Pixel, PixelOrder};
 
-use embedded_hal_async::spi::SpiBus;
-use smart_leds_trait::SmartLedsWriteAsync;
+use super::{bisync, SmartLedsWrite, SpiBus};
 
 /// A writer for APA102 LEDs
-pub struct Apa102Async<SPI> {
+#[bisync]
+pub struct Apa102<SPI> {
     spi: SPI,
     end_frame_length: u8,
     invert_end_frame: bool,
     pixel_order: PixelOrder,
 }
 
-impl<SPI> Apa102Async<SPI>
+#[bisync]
+impl<SPI> Apa102<SPI>
 where
     SPI: SpiBus,
 {
@@ -50,7 +51,8 @@ where
     }
 }
 
-impl<SPI> SmartLedsWriteAsync for Apa102Async<SPI>
+#[bisync]
+impl<SPI> SmartLedsWrite for Apa102<SPI>
 where
     SPI: SpiBus,
 {

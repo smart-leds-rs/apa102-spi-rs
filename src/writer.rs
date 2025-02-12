@@ -6,7 +6,6 @@ use super::{bisync, SmartLedsWrite, SpiBus};
 #[bisync]
 pub struct Apa102<SPI> {
     spi: SPI,
-    invert_end_frame: bool,
     pixel_order: PixelOrder,
 }
 
@@ -20,19 +19,16 @@ where
     pub fn new(spi: SPI) -> Self {
         Self {
             spi,
-            invert_end_frame: true,
             pixel_order: PixelOrder::BGR,
         }
     }
 
     pub fn new_with_options(
         spi: SPI,
-        invert_end_frame: bool,
         pixel_order: PixelOrder,
     ) -> Self {
         Self {
             spi,
-            invert_end_frame,
             pixel_order,
         }
     }
@@ -130,10 +126,7 @@ where
         // https://cpldcpu.com/2016/12/13/sk9822-a-clone-of-the-apa102/
         self.spi.write(&[0x00, 0x00, 0x00, 0x00]).await?;
         for _ in 0..num_end_frames {
-            match self.invert_end_frame {
-                false => self.spi.write(&[0xFF]).await?,
-                true => self.spi.write(&[0x00]).await?,
-            };
+            self.spi.write(&[0x00]).await?;
         }
         Ok(())
     }

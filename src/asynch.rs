@@ -1,14 +1,9 @@
-//! Use APA102 leds via SPI with asynchronous writing of data via the
-//! [`embedded_hal_async::spi::SpiBus`](https://docs.rs/embedded-hal-async/latest/embedded_hal_async/spi/trait.SpiBus.html) trait.
-//!
-//! - For usage with `smart-leds`
-//! - Implements the `SmartLedsWriteAsync` trait
-
 use crate::{Apa102Pixel, PixelOrder};
 
 use embedded_hal_async::spi::SpiBus;
 use smart_leds_trait::SmartLedsWriteAsync;
 
+/// A writer for APA102 LEDs
 pub struct Apa102Async<SPI> {
     spi: SPI,
     end_frame_length: u8,

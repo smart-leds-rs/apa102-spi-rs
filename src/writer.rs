@@ -6,7 +6,6 @@ use super::{bisync, SmartLedsWrite, SpiBus};
 #[bisync]
 pub struct Apa102<SPI> {
     spi: SPI,
-    end_frame_length: u8,
     invert_end_frame: bool,
     pixel_order: PixelOrder,
 }
@@ -16,16 +15,11 @@ impl<SPI> Apa102<SPI>
 where
     SPI: SpiBus,
 {
-    /// new constructs a controller for a series of APA102 LEDs.
-    /// By default, an End Frame consisting of 32 bits of zeroes is emitted
-    /// following the LED data. Control over the size and polarity
-    /// of the End Frame is possible using new_with_options().
-    /// PixelOrder defaults to BGR ordering, and can also be customized
-    /// using new_with_options()
+    /// Construct a writer for APA102 LEDs.
+    /// If your LEDs don't use the standard BGR ordering, use [Self::new_with_options] instead.
     pub fn new(spi: SPI) -> Self {
         Self {
             spi,
-            end_frame_length: 4,
             invert_end_frame: true,
             pixel_order: PixelOrder::BGR,
         }
@@ -33,13 +27,11 @@ where
 
     pub fn new_with_options(
         spi: SPI,
-        end_frame_length: u8,
         invert_end_frame: bool,
         pixel_order: PixelOrder,
     ) -> Self {
         Self {
             spi,
-            end_frame_length,
             invert_end_frame,
             pixel_order,
         }
@@ -61,10 +53,14 @@ where
     /// Write all the items of an iterator to an apa102 strip
     async fn write<T, I>(&mut self, iterator: T) -> Result<(), SPI::Error>
     where
-        T: IntoIterator<Item = I>,
+        T: IntoIterator<Item = I, IntoIter: ExactSizeIterator>,
         I: Into<Self::Color>,
     {
         self.spi.write(&[0x00, 0x00, 0x00, 0x00]).await?;
+        let iterator = iterator.into_iter();
+        // end frame bytes = # leds / 2 / 8 bits per byte
+        // https://cpldcpu.com/2014/11/30/understanding-the-apa102-superled/
+        let num_end_frames = iterator.len().div_ceil(16);
         for item in iterator {
             let item = item.into();
             match self.pixel_order {
@@ -130,7 +126,7 @@ where
                 }
             }
         }
-        for _ in 0..self.end_frame_length {
+        for _ in 0..num_end_frames {
             match self.invert_end_frame {
                 false => self.spi.write(&[0xFF]).await?,
                 true => self.spi.write(&[0x00]).await?,

@@ -126,6 +126,9 @@ where
                 }
             }
         }
+        // Need an extra start frame for SK9822 to update immediately. Has no effect for APA102
+        // https://cpldcpu.com/2016/12/13/sk9822-a-clone-of-the-apa102/
+        self.spi.write(&[0x00, 0x00, 0x00, 0x00]).await?;
         for _ in 0..num_end_frames {
             match self.invert_end_frame {
                 false => self.spi.write(&[0xFF]).await?,

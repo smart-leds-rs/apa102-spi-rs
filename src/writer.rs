@@ -6,6 +6,7 @@ use super::{bisync, SmartLedsWrite, SpiBus};
 #[bisync]
 pub struct Apa102<SPI> {
     spi: SPI,
+    end_frame_length_bytes: usize,
     pixel_order: PixelOrder,
 }
 
@@ -15,20 +16,14 @@ where
     SPI: SpiBus,
 {
     /// Construct a writer for APA102 LEDs.
-    /// If your LEDs don't use the standard BGR ordering, use [Self::new_with_options] instead.
-    pub fn new(spi: SPI) -> Self {
+    /// The standard pixel order is [`PixelOrder::BGR`], but some LED chips may require a different [`PixelOrder`].
+    pub fn new(spi: SPI, num_leds: usize, pixel_order: PixelOrder) -> Self {
+        // end frame bytes = # leds / 2 / 8 bits per byte
+        // https://cpldcpu.com/2014/11/30/understanding-the-apa102-superled/
+        let end_frame_length_bytes = num_leds.div_ceil(16);
         Self {
             spi,
-            pixel_order: PixelOrder::BGR,
-        }
-    }
-
-    pub fn new_with_options(
-        spi: SPI,
-        pixel_order: PixelOrder,
-    ) -> Self {
-        Self {
-            spi,
+            end_frame_length_bytes,
             pixel_order,
         }
     }
@@ -49,14 +44,10 @@ where
     /// Write all the items of an iterator to an apa102 strip
     async fn write<T, I>(&mut self, iterator: T) -> Result<(), SPI::Error>
     where
-        T: IntoIterator<Item = I, IntoIter: ExactSizeIterator>,
+        T: IntoIterator<Item = I>,
         I: Into<Self::Color>,
     {
         self.spi.write(&[0x00, 0x00, 0x00, 0x00]).await?;
-        let iterator = iterator.into_iter();
-        // end frame bytes = # leds / 2 / 8 bits per byte
-        // https://cpldcpu.com/2014/11/30/understanding-the-apa102-superled/
-        let num_end_frames = iterator.len().div_ceil(16);
         for item in iterator {
             let item = item.into();
             match self.pixel_order {
@@ -125,7 +116,7 @@ where
         // Need an extra start frame for SK9822 to update immediately. Has no effect for APA102
         // https://cpldcpu.com/2016/12/13/sk9822-a-clone-of-the-apa102/
         self.spi.write(&[0x00, 0x00, 0x00, 0x00]).await?;
-        for _ in 0..num_end_frames {
+        for _ in 0..self.end_frame_length_bytes {
             self.spi.write(&[0x00]).await?;
         }
         Ok(())

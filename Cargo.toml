@@ -15,7 +15,15 @@ readme = "README.md"
 repository = "https://github.com/smart-leds-rs/apa102-spi-rs"
 
 [dependencies]
+bisync = "0.3.0"
 smart-leds-trait = "0.3.1"
 embedded-hal = "1.0.0"
 embedded-hal-async = "1.0.0"
+ux = "0.1"
+defmt = { version = "0.3.0", optional = true }
 
+[features]
+defmt = [ "dep:defmt" ]
+
+[dev-dependencies]
+fastrand = "2.3.0"

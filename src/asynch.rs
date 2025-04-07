@@ -1,18 +1,9 @@
-//! Use APA102 leds via SPI with asynchronous writing of data via the
-//! [`embedded_hal_async::spi::SpiBus`](https://docs.rs/embedded-hal-async/latest/embedded_hal_async/spi/trait.SpiBus.html) trait.
-//!
-//! - For usage with `smart-leds`
-//! - Implements the `SmartLedsWriteAsync` trait
-//!
-//! Doesn't use the native brightness settings of the apa102 leds, since that
-//! runs at a much lower pwm frequency and thus nerfes the very high color pwm
-//! frequency. (According to Adafruit)
-
-use crate::PixelOrder;
+use crate::{Apa102Pixel, PixelOrder};
 
 use embedded_hal_async::spi::SpiBus;
-use smart_leds_trait::{RGB8, SmartLedsWriteAsync};
+use smart_leds_trait::SmartLedsWriteAsync;
 
+/// A writer for APA102 LEDs
 pub struct Apa102Async<SPI> {
     spi: SPI,
     end_frame_length: u8,
@@ -63,7 +54,7 @@ impl<SPI> SmartLedsWriteAsync for Apa102Async<SPI>
 where
     SPI: SpiBus,
 {
-    type Color = RGB8;
+    type Color = Apa102Pixel;
     type Error = SPI::Error;
     /// Write all the items of an iterator to an apa102 strip
     async fn write<T, I>(&mut self, iterator: T) -> Result<(), SPI::Error>
@@ -75,12 +66,66 @@ where
         for item in iterator {
             let item = item.into();
             match self.pixel_order {
-                PixelOrder::RGB => self.spi.write(&[0xFF, item.r, item.g, item.b]).await?,
-                PixelOrder::RBG => self.spi.write(&[0xFF, item.r, item.b, item.g]).await?,
-                PixelOrder::GRB => self.spi.write(&[0xFF, item.g, item.r, item.b]).await?,
-                PixelOrder::GBR => self.spi.write(&[0xFF, item.g, item.b, item.r]).await?,
-                PixelOrder::BRG => self.spi.write(&[0xFF, item.b, item.r, item.g]).await?,
-                PixelOrder::BGR => self.spi.write(&[0xFF, item.b, item.g, item.r]).await?,
+                PixelOrder::RGB => {
+                    self.spi
+                        .write(&[
+                            0b11100000 | u8::from(item.brightness),
+                            item.red,
+                            item.green,
+                            item.blue,
+                        ])
+                        .await?
+                }
+                PixelOrder::RBG => {
+                    self.spi
+                        .write(&[
+                            0b11100000 | u8::from(item.brightness),
+                            item.red,
+                            item.blue,
+                            item.green,
+                        ])
+                        .await?
+                }
+                PixelOrder::GRB => {
+                    self.spi
+                        .write(&[
+                            0b11100000 | u8::from(item.brightness),
+                            item.green,
+                            item.red,
+                            item.blue,
+                        ])
+                        .await?
+                }
+                PixelOrder::GBR => {
+                    self.spi
+                        .write(&[
+                            0b11100000 | u8::from(item.brightness),
+                            item.green,
+                            item.blue,
+                            item.red,
+                        ])
+                        .await?
+                }
+                PixelOrder::BRG => {
+                    self.spi
+                        .write(&[
+                            0b11100000 | u8::from(item.brightness),
+                            item.blue,
+                            item.red,
+                            item.green,
+                        ])
+                        .await?
+                }
+                PixelOrder::BGR => {
+                    self.spi
+                        .write(&[
+                            0b11100000 | u8::from(item.brightness),
+                            item.blue,
+                            item.green,
+                            item.red,
+                        ])
+                        .await?
+                }
             }
         }
         for _ in 0..self.end_frame_length {

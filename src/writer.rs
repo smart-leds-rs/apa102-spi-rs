@@ -4,14 +4,14 @@ use super::{bisync, SmartLedsWrite, SpiBus};
 
 /// A writer for APA102 LEDs
 #[bisync]
-pub struct Apa102<SPI> {
+pub struct Apa102Writer<SPI> {
     spi: SPI,
     end_frame_length_bytes: usize,
     pixel_order: PixelOrder,
 }
 
 #[bisync]
-impl<SPI> Apa102<SPI>
+impl<SPI> Apa102Writer<SPI>
 where
     SPI: SpiBus,
 {
@@ -35,7 +35,7 @@ where
 }
 
 #[bisync]
-impl<SPI> SmartLedsWrite for Apa102<SPI>
+impl<SPI> SmartLedsWrite for Apa102Writer<SPI>
 where
     SPI: SpiBus,
 {

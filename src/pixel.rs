@@ -37,8 +37,8 @@ impl From<RGB8> for Apa102Pixel {
 }
 
 impl Apa102Pixel {
-    /// Convert an [rgb::RGB8](https://docs.rs/rgb/latest/rgb/type.RGB8.html) to an [Apa102Pixel]
-    /// with a specified brightness level. Any [u8] is a valid brightness level from 0 to 255.
+    /// Convert an [RGB8] to an [Apa102Pixel] with a specified brightness level.
+    /// Any [u8] is a valid brightness level from 0 to 255.
     /// [FastLED's psuedo-13-bit gamma correction algorithm](https://github.com/FastLED/FastLED/blob/d5aaf65be19782f3e52b8b0fe38778f14376a293/APA102.md)
     /// is used to make use of the dynamic range available from the APA102 protocol, preserving
     /// color detail at low brightness. In short, it converts:
@@ -54,14 +54,13 @@ impl Apa102Pixel {
         crate::pseudo13::five_bit_hd_gamma_bitshift(&rgb8, brightness, color_correction)
     }
 
-    /// Convert an [rgb::RGB16](https://docs.rs/rgb/latest/rgb/type.RGB16.html) to an [Apa102Pixel]
-    /// with a specified brightness level. Any [u8] is a valid brightness level from 0 to 255.
+    /// Convert an [RGB16] to an [Apa102Pixel] with a specified brightness level.
+    /// Any [u8] is a valid brightness level from 0 to 255.
     /// [FastLED's psuedo-13-bit gamma correction algorithm](https://github.com/FastLED/FastLED/blob/d5aaf65be19782f3e52b8b0fe38778f14376a293/APA102.md)
     /// is used to make use of the dynamic range available from the APA102 protocol, preserving
     /// color detail at low brightness.
     ///
-    /// This function does not apply gamma correction; the [rgb::RGB16](https://docs.rs/rgb/latest/rgb/type.RGB16.html)
-    /// input is assumed to be gamma corrected already.
+    /// This function does not apply gamma correction; the [RGB16] input is assumed to be gamma corrected already.
     pub fn from_rgb16_with_brightness(rgb16: RGB16, brightness: u8) -> Self {
         crate::pseudo13::five_bit_bitshift(rgb16, brightness)
     }

@@ -6,8 +6,7 @@ use super::{bisync, SmartLedsWrite, SpiBus};
 #[bisync]
 pub struct Apa102<SPI> {
     spi: SPI,
-    end_frame_length: u8,
-    invert_end_frame: bool,
+    end_frame_length_bytes: usize,
     pixel_order: PixelOrder,
 }
 
@@ -16,31 +15,15 @@ impl<SPI> Apa102<SPI>
 where
     SPI: SpiBus,
 {
-    /// new constructs a controller for a series of APA102 LEDs.
-    /// By default, an End Frame consisting of 32 bits of zeroes is emitted
-    /// following the LED data. Control over the size and polarity
-    /// of the End Frame is possible using new_with_options().
-    /// PixelOrder defaults to BGR ordering, and can also be customized
-    /// using new_with_options()
-    pub fn new(spi: SPI) -> Self {
+    /// Construct a writer for APA102 LEDs.
+    /// The standard pixel order is [`PixelOrder::BGR`], but some LED chips may require a different [`PixelOrder`].
+    pub fn new(spi: SPI, num_leds: usize, pixel_order: PixelOrder) -> Self {
+        // end frame bytes = # leds / 2 / 8 bits per byte
+        // https://cpldcpu.com/2014/11/30/understanding-the-apa102-superled/
+        let end_frame_length_bytes = num_leds.div_ceil(16);
         Self {
             spi,
-            end_frame_length: 4,
-            invert_end_frame: true,
-            pixel_order: PixelOrder::BGR,
-        }
-    }
-
-    pub fn new_with_options(
-        spi: SPI,
-        end_frame_length: u8,
-        invert_end_frame: bool,
-        pixel_order: PixelOrder,
-    ) -> Self {
-        Self {
-            spi,
-            end_frame_length,
-            invert_end_frame,
+            end_frame_length_bytes,
             pixel_order,
         }
     }
@@ -130,11 +113,11 @@ where
                 }
             }
         }
-        for _ in 0..self.end_frame_length {
-            match self.invert_end_frame {
-                false => self.spi.write(&[0xFF]).await?,
-                true => self.spi.write(&[0x00]).await?,
-            };
+        // Need an extra start frame for SK9822 to update immediately. Has no effect for APA102
+        // https://cpldcpu.com/2016/12/13/sk9822-a-clone-of-the-apa102/
+        self.spi.write(&[0x00, 0x00, 0x00, 0x00]).await?;
+        for _ in 0..self.end_frame_length_bytes {
+            self.spi.write(&[0x00]).await?;
         }
         Ok(())
     }

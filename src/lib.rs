@@ -34,19 +34,19 @@
 //! #   }
 //! # }
 //! # let get_spi_peripheral_from_your_hal = DummySpi {};
-//! use apa102_spi::{Apa102, Apa102Pixel, u5, SmartLedsWrite, RGB8};
+//! use apa102_spi::{u5, Apa102, Apa102Pixel, PixelOrder, SmartLedsWrite, RGB8};
 //!
 //! // You only need to specify MOSI and clock pins for your SPI peripheral.
 //! // APA102 LEDs do not send data over MISO and do not have a CS pin.
 //! let spi = get_spi_peripheral_from_your_hal;
-//! let mut led_strip = Apa102::new(spi);
+//! let mut led_strip = Apa102::new(spi, 1, PixelOrder::BGR);
 //!
 //! // Specify pixel values as 8 bit RGB + 5 bit brightness
 //! let led_buffer = [Apa102Pixel { red: 255, green: 0, blue: 0, brightness: u5::new(1) }];
 //! led_strip.write(led_buffer);
 //!
 //! // Specify pixel values with 8 bit RGB values
-//! let led_buffer_rgb = [RGB8 { r: 255, g: 0, b: 0}];
+//! let led_buffer_rgb = [RGB8 { r: 255, g: 0, b: 0 }];
 //! // Brightness is set to maximum value (31) in `impl From<RGB8> for Apa102Pixel`
 //! led_strip.write(led_buffer_rgb);
 //!

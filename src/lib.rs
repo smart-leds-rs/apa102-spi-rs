@@ -39,7 +39,7 @@
 //! // You only need to specify MOSI and clock pins for your SPI peripheral.
 //! // APA102 LEDs do not send data over MISO and do not have a CS pin.
 //! let spi = get_spi_peripheral_from_your_hal;
-//! let mut led_strip = Apa102::new(spi, 1, PixelOrder::BGR);
+//! let mut led_strip = Apa102::new(spi, 1, PixelOrder::default());
 //!
 //! // Specify pixel values as 8 bit RGB + 5 bit brightness
 //! let led_buffer = [Apa102Pixel { red: 255, green: 0, blue: 0, brightness: u5::new(1) }];
@@ -89,7 +89,13 @@ pub enum PixelOrder {
     GRB,
     GBR,
     BRG,
-    BGR, // Default
+    BGR,
+}
+
+impl Default for PixelOrder {
+    fn default() -> Self {
+        PixelOrder::BGR
+    }
 }
 
 #[path = "."]

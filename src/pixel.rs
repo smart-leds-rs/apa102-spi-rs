@@ -39,7 +39,7 @@ impl From<RGB8> for Apa102Pixel {
 impl Apa102Pixel {
     /// Convert an [RGB8] to an [Apa102Pixel] with a specified brightness level.
     /// Any [u8] is a valid brightness level from 0 to 255.
-    /// [FastLED's psuedo-13-bit gamma correction algorithm](https://github.com/FastLED/FastLED/blob/d5aaf65be19782f3e52b8b0fe38778f14376a293/APA102.md)
+    /// [FastLED's psuedo-13-bit gamma correction algorithm](https://github.com/FastLED/FastLED/blob/master/APA102.md)
     /// is used to make use of the dynamic range available from the APA102 protocol, preserving
     /// color detail at low brightness. In short, it converts:
     ///
@@ -56,7 +56,7 @@ impl Apa102Pixel {
 
     /// Convert an [RGB16] to an [Apa102Pixel] with a specified brightness level.
     /// Any [u8] is a valid brightness level from 0 to 255.
-    /// [FastLED's psuedo-13-bit gamma correction algorithm](https://github.com/FastLED/FastLED/blob/d5aaf65be19782f3e52b8b0fe38778f14376a293/APA102.md)
+    /// [FastLED's psuedo-13-bit gamma correction algorithm](https://github.com/FastLED/FastLED/blob/master/APA102.md)
     /// is used to make use of the dynamic range available from the APA102 protocol, preserving
     /// color detail at low brightness.
     ///

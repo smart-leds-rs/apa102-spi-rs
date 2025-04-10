@@ -1,4 +1,4 @@
-//! Send data to APA102 LEDs via SPI. This crate provides both blocking and asynchronous implementations, which require a HAL crate for your microcontroller with an implementation of the [embedded_hal::spi::SpiBus] or [embedded_hal_async::spi::SpiBus] trait.
+//! Send data to APA102 LEDs (also known as DotStar LEDs) via SPI. This crate is also compatible with SK9822 LEDs which share the same protocol as APA102 LEDs. Both blocking and asynchronous implementations are provided, which require a HAL crate for your microcontroller with an implementation of the [embedded_hal::spi::SpiBus] or [embedded_hal_async::spi::SpiBus] trait.
 //!
 //! There are several ways to send pixel data:
 //!   * Handle all details of the protocol yourself with the [Apa102Pixel] struct, 8 bit RGB + 5 bits brightness
@@ -81,8 +81,9 @@ pub const MODE: Mode = Mode {
     phase: Phase::CaptureOnFirstTransition,
 };
 
-/// What order to transmit pixel colors. Different Dotstars
-/// need their pixel color data sent in different orders.
+/// What order to transmit pixel colors. The standard order
+/// is [PixelOrder::BGR], however in practice, some LEDs
+/// swap the order of the colors in the protocol.
 pub enum PixelOrder {
     RGB,
     RBG,

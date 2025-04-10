@@ -7,8 +7,8 @@ categories = [
     "embedded",
     "no-std",
     "hardware-support"]
-keywords = ["smart-leds", "apa102"]
-description = "SPI-based Driver for apa102 leds"
+keywords = ["smart-leds", "apa102", "dotstar", "sk9822"]
+description = "Driver for writing to APA102 (DotStar) and SK9822 LEDs over SPI"
 documentation = "https://docs.rs/crate/apa102-spi"
 license = "MIT OR Apache-2.0"
 readme = "README.md"

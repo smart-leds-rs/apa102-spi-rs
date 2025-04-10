@@ -34,12 +34,12 @@
 //! #   }
 //! # }
 //! # let get_spi_peripheral_from_your_hal = DummySpi {};
-//! use apa102_spi::{u5, Apa102, Apa102Pixel, PixelOrder, SmartLedsWrite, RGB8};
+//! use apa102_spi::{u5, Apa102Pixel, Apa102Writer, PixelOrder, SmartLedsWrite, RGB8};
 //!
 //! // You only need to specify MOSI and clock pins for your SPI peripheral.
 //! // APA102 LEDs do not send data over MISO and do not have a CS pin.
 //! let spi = get_spi_peripheral_from_your_hal;
-//! let mut led_strip = Apa102::new(spi, 1, PixelOrder::default());
+//! let mut led_strip = Apa102Writer::new(spi, 1, PixelOrder::default());
 //!
 //! // Specify pixel values as 8 bit RGB + 5 bit brightness
 //! let led_buffer = [Apa102Pixel { red: 255, green: 0, blue: 0, brightness: u5::new(1) }];
@@ -107,7 +107,7 @@ mod asynchronous {
     mod writer;
     pub use writer::*;
 }
-pub use asynchronous::Apa102 as Apa102Async;
+pub use asynchronous::Apa102Writer as Apa102WriterAsync;
 
 #[path = "."]
 mod blocking {
@@ -118,4 +118,4 @@ mod blocking {
     mod writer;
     pub use writer::*;
 }
-pub use blocking::Apa102;
+pub use blocking::Apa102Writer;
